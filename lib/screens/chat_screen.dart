@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fcc/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +8,8 @@ final _auth = FirebaseAuth.instance;
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'cs';
+
+  const ChatScreen({super.key});
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -17,7 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   User? loggedinuser;
   void getcurruser()async {
     try{
-      final user = await _auth.currentUser;
+      final user = _auth.currentUser;
       if(user!=null){
         loggedinuser=user;
 
@@ -39,14 +41,7 @@ class _ChatScreenState extends State<ChatScreen> {
   //     print(message.data());
   //   }
   // }
-  Future<void> getstreams() async {
 
-    await for(var snap in _firestore.collection('messages').snapshots()){
-      for( var message in snap.docs){
-        print(message.data());
-      }
-    }
-  }
   String? getemail(){
     if(loggedinuser!=null){
       return loggedinuser?.email;
@@ -67,13 +62,13 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: null,
         actions: <Widget>[
           IconButton(
-              icon: Icon(Icons.close),
+              icon: const Icon(Icons.close),
               onPressed: () {
                 _auth.signOut();
                 Navigator.pop(context);
               }),
         ],
-        title: Text('⚡️Chat'),
+        title: const Text('⚡️Chat'),
         backgroundColor: Colors.lightBlueAccent,
       ),
       body: SafeArea(
@@ -106,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         'sender':loggedinuser?.email,
                       });
                     },
-                    child: Text(
+                    child: const Text(
                       'Send',
                       style: kSendButtonTextStyle,
                     ),
@@ -124,7 +119,7 @@ class MessageBubble extends StatelessWidget {
 final String sender;
 final String text;
 final bool isme;
-MessageBubble({required this.sender,required this.text,required this.isme});
+const MessageBubble({super.key, required this.sender,required this.text,required this.isme});
 
 @override
   Widget build(BuildContext context) {
@@ -136,19 +131,19 @@ MessageBubble({required this.sender,required this.text,required this.isme});
       child: Column(
         crossAxisAlignment: isme?CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text('$sender',
-      style: TextStyle(fontSize: 12,color: Colors.black),),
+          Text(sender,
+      style: const TextStyle(fontSize: 12,color: Colors.black),),
           Material(
             elevation: 10,
 shadowColor: Colors.white30,
-            borderRadius: isme?BorderRadius.only(
-                bottomRight: Radius.circular(30),bottomLeft: Radius.circular(30),topLeft: Radius.circular(30),):BorderRadius.only(
+            borderRadius: isme?const BorderRadius.only(
+                bottomRight: Radius.circular(30),bottomLeft: Radius.circular(30),topLeft: Radius.circular(30),):const BorderRadius.only(
               bottomRight: Radius.circular(30),bottomLeft: Radius.circular(30),topRight: Radius.circular(30),),
             color: isme?Colors.blueAccent:Colors.red,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text('$text',
-                style: TextStyle(fontSize: 15.0)),
+                child: Text(text,
+                style: const TextStyle(fontSize: 15.0)),
               ),
           ),
         ],
@@ -159,7 +154,7 @@ shadowColor: Colors.white30,
 }
 class MessageStream extends StatelessWidget {
   final String? loggedinuser;
-   MessageStream({required this.loggedinuser});
+   const MessageStream({super.key, required this.loggedinuser});
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +162,7 @@ class MessageStream extends StatelessWidget {
       stream: _firestore.collection('messages').snapshots(),
       builder: (context, snapshot) {
         if(snapshot.hasData==false){
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
               color: Colors.red,
             ),
@@ -186,7 +181,7 @@ class MessageStream extends StatelessWidget {
         }
         return Expanded(child:ListView(
           reverse: true,
-          padding: EdgeInsets.symmetric(),
+          padding: const EdgeInsets.symmetric(),
           children: messagewid,
         ),);
       },
