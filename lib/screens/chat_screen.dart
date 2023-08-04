@@ -1,10 +1,13 @@
-
+import 'package:fcc/screens/enteringscreen.dart';
+import 'package:fcc/screens/login_screen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:fcc/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import'package:cloud_firestore/cloud_firestore.dart';
 final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
+
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'cs';
@@ -17,6 +20,9 @@ class _ChatScreenState extends State<ChatScreen> {
   String messagetext = '';
   final messagetest = TextEditingController();
   User? loggedinuser;
+  String a  = 'Back to home';
+
+
   void getcurruser()async {
     try{
       final user = _auth.currentUser;
@@ -57,59 +63,89 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: null,
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                _auth.signOut();
-                Navigator.pop(context);
-              }),
-        ],
-        title: const Text('⚡️Chat'),
-        backgroundColor: Colors.lightBlueAccent,
-      ),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-           MessageStream(loggedinuser: getemail()),
-            Container(
-              decoration: kMessageContainerDecoration,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: messagetest,
-                      onChanged: (value) {
-                        //Do something with the user input.
-
-                        messagetext=value;
-                      },
-                      decoration: kMessageTextFieldDecoration,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      messagetest.clear();
-                      _firestore.collection('messages').add({
-                        'text':messagetext,
-                        'sender':loggedinuser?.email,
-                      });
-                    },
-                    child: const Text(
-                      'Send',
-                      style: kSendButtonTextStyle,
-                    ),
-                  ),
-                ],
+    return WillPopScope(
+      onWillPop: ()  async {
+        bool willLeave = false;
+          await Alert(
+          context: context,
+          type: AlertType.warning,
+          title: " $a <",
+          desc: "Do You Want To Leave",
+          buttons: [
+            DialogButton(
+              child: Text(
+                "COOL",
+                style: TextStyle(color: Colors.white, fontSize: 20),
               ),
-            ),
+              onPressed: () {
+                willLeave = true;
+                Navigator.pushNamed(context,entering.id);
+              },
+              width: 120,
+            )
           ],
+        ).show();
+          return willLeave;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: null,
+          actions: <Widget>[
+            TextButton(
+                child: Text('Logout',style: TextStyle(color: Colors.white),),
+                onPressed: () {
+                  setState(() {
+                    a = 'Want to logout';
+                    _auth.signOut();
+                    Navigator.pushReplacementNamed(context, LoginScreen.id);
+                  });
+                }),
+          ],
+          title: const Text('⚡️Chat'),
+          backgroundColor: Colors.lightBlueAccent,
+        ),
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+             MessageStream(loggedinuser: getemail()),
+              Container(
+                decoration: kMessageContainerDecoration,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: messagetest,
+                        onChanged: (value) {
+                          //Do something with the user input.
+
+                          messagetext=value;
+                        },
+                        decoration: kMessageTextFieldDecoration,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        messagetest.clear();
+                        _firestore.collection('messages').add({
+                          'text':messagetext,
+                          'sender':loggedinuser?.email,
+                          'time':DateTime.timestamp(),
+                          'time2':DateTime.timestamp(),
+                        });
+                      },
+                      child: const Text(
+                        'Send',
+                        style: kSendButtonTextStyle,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -159,7 +195,7 @@ class MessageStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _firestore.collection('messages').orderBy('time', descending: false).snapshots(),
       builder: (context, snapshot) {
         if(snapshot.hasData==false){
           return const Center(
@@ -168,6 +204,7 @@ class MessageStream extends StatelessWidget {
             ),
           );
         }
+
         final messages = snapshot.data?.docs.reversed;
         List<MessageBubble> messagewid = [];
         for(var message in messages!){

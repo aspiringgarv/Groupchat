@@ -1,4 +1,5 @@
 import 'package:fcc/screens/chat_screen.dart';
+import 'package:fcc/screens/enteringscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -11,7 +12,7 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>  {
   final _auth = FirebaseAuth.instance;
   String email="";
   String pass="";
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
              try{
                final user = await _auth.signInWithEmailAndPassword(email: email, password: pass);
                if(user!=null){
-                 Navigator.pushNamed(context, ChatScreen.id);
+                 Navigator.pushNamed(context, entering.id);
                }
                setState(() {
                  spinning=false;
@@ -83,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
              }
              catch(e){
                setState(() {
+                 spinning=false;
                  ScaffoldMessenger.of(context).showSnackBar( SnackBar(
                    content: Text(e.toString()),
                  ));

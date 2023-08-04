@@ -75,8 +75,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 final newUser = await _auth.createUserWithEmailAndPassword(
                     email: email, password: pass);
                 if(newUser!=null){
-
-                  Navigator.pushNamed(context, ChatScreen.id);
+                  setState(() {
+                    showspinner=false;
+                    ScaffoldMessenger.of(context).showSnackBar( SnackBar(
+                      elevation: 10,
+                      backgroundColor: Colors.blue,
+                      content: Text("registered successfully => plz login to continue",style: TextStyle(color: Colors.black87),),
+                    ));
+                  });
                 }
                 setState(() {
                   showspinner=false;
@@ -84,6 +90,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               }/*if user enter any password and email already registered */
               catch(e){
                setState(() {
+                 showspinner=false;
                  ScaffoldMessenger.of(context).showSnackBar( SnackBar(
                    content: Text(e.toString()),
                  ));
